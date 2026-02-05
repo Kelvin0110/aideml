@@ -30,7 +30,8 @@ def _setup_openai_client():
     global _client
     # Use real OpenAI API with proper API key, explicitly override base_url
     api_key = os.getenv("OPENAI_API_KEY")
-    _client = openai.OpenAI(api_key=api_key, base_url=OPENAI_BASE_URL, max_retries=0)
+    base_url = os.getenv("OPENAI_BASE_URL", OPENAI_BASE_URL)
+    _client = openai.OpenAI(api_key=api_key, base_url=base_url, max_retries=0)
 
 
 @once
@@ -71,7 +72,7 @@ def query(
     # Use different API based on whether this is a non-OpenAI model with custom base URL
     model_name = filtered_kwargs.get("model", "")
     is_openai_model = re.match(r"^(gpt-|o\d-|codex-mini-latest$)", model_name)
-    use_chat_api = os.getenv("OPENAI_BASE_URL") is not None and not is_openai_model
+    use_chat_api = os.getenv("OPENAI_BASE_URL") is not None or not is_openai_model
 
     if use_chat_api:
         _setup_custom_client()
