@@ -125,6 +125,8 @@ class Interpreter:
         # this seems to only  benecessary because we're exec'ing code from a string,
         # a .py file should be able to import modules from the cwd anyway
         sys.path.append(str(self.working_dir))
+        if (self.working_dir / "input").exists():
+            sys.path.append(str(self.working_dir / "input"))
 
         # capture stdout and stderr
         # trunk-ignore(mypy/assignment)
@@ -135,7 +137,7 @@ class Interpreter:
     ) -> None:
         self.child_proc_setup(result_outq)
 
-        global_scope: dict = {}
+        global_scope: dict = {"__file__": str(self.working_dir / self.agent_file_name)}
         while True:
             code = code_inq.get()
             os.chdir(str(self.working_dir))
@@ -144,6 +146,8 @@ class Interpreter:
 
             event_outq.put(("state:ready",))
             try:
+                # Ensure the global scope has the correct __file__ and __name__
+                global_scope["__name__"] = "__main__"
                 exec(compile(code, self.agent_file_name, "exec"), global_scope)
             except BaseException as e:
                 tb_str, e_cls_name, exc_info, exc_stack = exception_summary(

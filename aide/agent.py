@@ -309,19 +309,25 @@ class Agent:
             "Execution output": wrap_code(node.term_out, lang=""),
         }
 
-        response = cast(
-            dict,
-            query(
-                system_message=prompt,
-                user_message=None,
-                func_spec=review_func_spec,
-                model=self.acfg.feedback.model,
-                temperature=self.acfg.feedback.temp,
-            ),
+        response = query(
+            system_message=prompt,
+            user_message=None,
+            func_spec=review_func_spec,
+            model=self.acfg.feedback.model,
+            temperature=self.acfg.feedback.temp,
         )
 
+        if not isinstance(response, dict):
+            logger.warning(
+                f"Agent feedback query failed to return a dict. Response: {response}"
+            )
+            node.analysis = "Error: feedback query failed to return a structured review."
+            node.is_buggy = True
+            node.metric = WorstMetricValue()
+            return
+
         # if the metric isn't a float then fill the metric with the worst metric
-        if not isinstance(response["metric"], float):
+        if not isinstance(response.get("metric"), (float, int)):
             response["metric"] = None
 
         node.analysis = response["summary"]
