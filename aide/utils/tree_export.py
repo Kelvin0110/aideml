@@ -11,8 +11,11 @@ from ..journal import Journal
 
 def get_edges(journal: Journal):
     for node in journal:
+        if node.step is None:
+            continue
         for c in node.children:
-            yield (node.step, c.step)
+            if c.step is not None:
+                yield (node.step, c.step)
 
 
 def generate_layout(n_nodes, edges, layout_type="rt"):

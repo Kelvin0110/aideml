@@ -152,6 +152,10 @@ def query(
     # Parse the output based on API type
     if use_chat_api:
         # Chat completions API response
+        if not response or not hasattr(response, "choices") or not response.choices:
+            logger.error(f"Invalid response from OpenAI API: {response}")
+            raise RuntimeError(f"OpenAI API returned an invalid response (no choices): {response}")
+            
         message = response.choices[0].message
 
         if (
