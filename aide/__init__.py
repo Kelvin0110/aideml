@@ -21,7 +21,15 @@ class Solution:
 
 
 class Experiment:
-    def __init__(self, data_dir: str, goal: str, eval: str | None = None, exp_name: str | None = None, workspace_dir: str | None = None):
+    def __init__(
+        self,
+        data_dir: str,
+        goal: str,
+        eval: str | None = None,
+        exp_name: str | None = None,
+        workspace_dir: str | None = None,
+        log_dir: str | None = None,
+    ):
         """Initialize a new experiment run.
 
         Args:
@@ -30,6 +38,7 @@ class Experiment:
             eval (str | None, optional): Optional description of the preferred way for the agent to evaluate its solutions.
             exp_name (str | None, optional): Name of the experiment.
             workspace_dir (str | None, optional): Directory to store the workspace.
+            log_dir (str | None, optional): Directory to store the logs.
         """
 
         _cfg = _load_cfg(use_cli_args=False)
@@ -40,6 +49,8 @@ class Experiment:
             _cfg.exp_name = exp_name
         if workspace_dir is not None:
             _cfg.workspace_dir = workspace_dir
+        if log_dir is not None:
+            _cfg.log_dir = log_dir
         self.cfg = prep_cfg(_cfg)
 
         self.task_desc = load_task_desc(self.cfg)
