@@ -13,7 +13,6 @@ import signal
 import sys
 import time
 import traceback
-import multiprocessing
 from dataclasses import dataclass
 from multiprocessing import Process, Queue
 from pathlib import Path
@@ -177,9 +176,8 @@ class Interpreter:
         # - result_outq: receive stdout/stderr from child
         # - event_outq: receive events from child (e.g. state:ready, state:finished)
         # trunk-ignore(mypy/var-annotated)
-        ctx = multiprocessing.get_context("spawn")
-        self.code_inq, self.result_outq, self.event_outq = ctx.Queue(), ctx.Queue(), ctx.Queue()
-        self.process = ctx.Process(
+        self.code_inq, self.result_outq, self.event_outq = Queue(), Queue(), Queue()
+        self.process = Process(
             target=self._run_session,
             args=(self.code_inq, self.result_outq, self.event_outq),
         )
